@@ -1,1 +1,215 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fikury-SEEK AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .theme-transition { transition: background-color 0.3s, color 0.3s, border-color 0.3s; }
+        @keyframes pulse-mic {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.15); opacity: 0.7; }
+        }
+        .mic-active { animation: pulse-mic 1.2s infinite; color: #ef4444 !important; }
+        /* Hide scrollbar for clean inputs */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-zinc-950 dark:text-zinc-50 theme-transition h-screen flex flex-col overflow-hidden">
+
+    <header class="bg-white dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 px-4 py-3 flex items-center justify-between z-10 theme-transition">
+        <div class="flex items-center space-x-3">
+            <div class="bg-brand-500 text-white p-2 rounded-xl flex items-center justify-center shadow-lg shadow-brand-500/20">
+                <i class="fa-solid fa-wand-magic-sparkles text-lg"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-lg tracking-tight">Fikury-<span class="text-brand-500">SEEK</span></h1>
+                <p class="text-xs text-slate-400 dark:text-zinc-500">Next-Gen Intelligent Assistant</p>
+            </div>
+        </div>
+        
+        <div class="flex items-center space-x-2">
+            <button id="themeToggle" class="p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 dark:text-zinc-400 transition-colors">
+                <i id="themeIcon" class="fa-solid fa-sun text-lg hidden dark:block"></i>
+                <i id="themeIconLight" class="fa-solid fa-moon text-lg dark:hidden"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 flex flex-col relative overflow-hidden bg-slate-50 dark:bg-zinc-950">
+        
+        <div id="chatContainer" class="flex-1 overflow-y-auto p-4 space-y-6 scroll-smooth">
+            <div id="welcomeScreen" class="h-full flex flex-col items-center justify-center text-center px-4 max-w-xl mx-auto py-12">
+                <div class="w-16 h-16 bg-brand-100 dark:bg-brand-900/30 text-brand-600 dark:text-brand-500 rounded-2xl flex items-center justify-center mb-6 text-2xl animate-bounce">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+                <h2 class="text-2xl font-bold mb-2">Welcome to Fikury-SEEK</h2>
+                <p class="text-sm text-slate-500 dark:text-zinc-400 mb-8">An optimized chat layout featuring dynamic tool integration, clean rendering engines, and highly responsive UI blocks.</p>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+                    <button onclick="fillPrompt('Explain Enterprise Process Integration (EPI)')" class="p-3 text-left text-xs bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl hover:border-brand-500 dark:hover:border-brand-500 transition-all shadow-sm">
+                        <i class="fa-solid fa-network-wired text-brand-500 mb-1 block"></i>
+                        <strong>Explain concepts</strong> — Break down technical architecture workflows.
+                    </button>
+                    <button onclick="fillPrompt('Write a clean MySQL multi-table connection script')" class="p-3 text-left text-xs bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl hover:border-brand-500 dark:hover:border-brand-500 transition-all shadow-sm">
+                        <i class="fa-solid fa-database text-brand-500 mb-1 block"></i>
+                        <strong>Write code</strong> — Optimize script logic & operational setups.
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="attachmentDrawer" class="mx-4 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl p-4 shadow-xl translate-y-full hidden transition-all duration-300 ease-out space-y-3">
+            <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Context Attachments</h4>
+            <div class="grid grid-cols-3 gap-3">
+                <button class="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-100 dark:border-zinc-800 hover:border-brand-500 transition-colors">
+                    <i class="fa-solid fa-file-pdf text-xl text-red-500 mb-1"></i>
+                    <span class="text-[11px] font-medium">Document</span>
+                </button>
+                <button class="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-100 dark:border-zinc-800 hover:border-brand-500 transition-colors">
+                    <i class="fa-solid fa-image text-xl text-blue-500 mb-1"></i>
+                    <span class="text-[11px] font-medium">Images</span>
+                </button>
+                <button class="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-100 dark:border-zinc-800 hover:border-brand-500 transition-colors">
+                    <i class="fa-solid fa-code text-xl text-amber-500 mb-1"></i>
+                    <span class="text-[11px] font-medium">Code file</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="p-4 bg-transparent">
+            <div class="max-w-3xl mx-auto bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-md p-2 flex items-end space-x-2">
+                
+                <button id="drawerBtn" class="p-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 transition-colors rounded-xl mb-0.5">
+                    <i class="fa-solid fa-paperclip text-lg"></i>
+                </button>
+
+                <button id="micBtn" class="p-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 transition-colors rounded-xl mb-0.5">
+                    <i id="micIcon" class="fa-solid fa-microphone text-lg"></i>
+                </button>
+
+                <textarea id="userInput" rows="1" placeholder="Ask Fikury-SEEK something..." class="flex-1 bg-transparent border-0 outline-none focus:ring-0 resize-none py-2 text-sm max-h-32 no-scrollbar font-normal placeholder-slate-400 dark:placeholder-zinc-500 focus:outline-none" style="outline: none; box-shadow: none;"></textarea>
+
+                <button id="sendBtn" class="bg-brand-500 hover:bg-brand-600 text-white p-2.5 rounded-xl transition-all shadow-md shadow-brand-500/10 hover:shadow-brand-500/20 mb-0.5">
+                    <i class="fa-solid fa-paper-plane text-sm"></i>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+        const htmlElement = document.documentElement;
+        const drawerBtn = document.getElementById('drawerBtn');
+        const attachmentDrawer = document.getElementById('attachmentDrawer');
+        const micBtn = document.getElementById('micBtn');
+        const micIcon = document.getElementById('micIcon');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const chatContainer = document.getElementById('chatContainer');
+        const welcomeScreen = document.getElementById('welcomeScreen');
+
+        // Dynamic Input Window Height Auto-adjust
+        userInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+
+        // 1. Dark Theme Component Controller Switcher
+        themeToggle.addEventListener('click', () => {
+            htmlElement.classList.toggle('dark');
+        });
+
+        // 2. Sliding Drawer Framework Engine Toggle Logic
+        drawerBtn.addEventListener('click', () => {
+            if(attachmentDrawer.classList.contains('hidden')) {
+                attachmentDrawer.classList.remove('hidden');
+                setTimeout(() => attachmentDrawer.classList.remove('translate-y-full'), 10);
+            } else {
+                attachmentDrawer.classList.add('translate-y-full');
+                setTimeout(() => attachmentDrawer.classList.add('hidden'), 300);
+            }
+        });
+
+        // 3. Audio Recording/Voice Simulation Framework Control Toggle
+        micBtn.addEventListener('click', () => {
+            micIcon.classList.toggle('mic-active');
+            if(micIcon.classList.contains('mic-active')) {
+                userInput.placeholder = "Listening to audio feed channel input stream...";
+            } else {
+                userInput.placeholder = "Ask Fikury-SEEK something...";
+            }
+        });
+
+        // Helper quick suggestion selector tool script execution context
+        function fillPrompt(text) {
+            userInput.value = text;
+            userInput.focus();
+            userInput.dispatchEvent(new Event('input'));
+        }
+
+        // 4. Client Side Dynamic Messaging Append Control Engine
+        function appendMessage(text, isUser = true) {
+            if (welcomeScreen && welcomeScreen.style.display !== 'none') {
+                welcomeScreen.style.display = 'none';
+            }
+
+            const msgRow = document.createElement('div');
+            msgRow.className = `flex ${isUser ? 'justify-end' : 'justify-start'} w-full animate-fade-in`;
+
+            const msgBubble = document.createElement('div');
+            msgBubble.className = `max-w-[85%] sm:max-w-xl p-3.5 rounded-2xl text-sm leading-relaxed ${
+                isUser 
+                ? 'bg-brand-600 text-white rounded-tr-none shadow-sm' 
+                : 'bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-800 dark:text-zinc-100 rounded-tl-none'
+            }`;
+            
+            msgBubble.innerHTML = text;
+            msgRow.appendChild(msgBubble);
+            chatContainer.appendChild(msgRow);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Send Interaction Logic Execution Context Handle Action Routine
+        function handleSend() {
+            const queryValue = userInput.value.trim();
+            if(!queryValue) return;
+
+            appendMessage(queryValue, true);
+            userInput.value = '';
+            userInput.style.height = 'auto';
+
+            // Automatic Mock Streaming Generation Response Simulator
+            setTimeout(() => {
+                appendMessage(`<div class="flex items-center space-x-2 text-xs text-brand-500 font-medium mb-1"><i class="fa-solid fa-sparkles"></i> <span>Fikury-SEEK Response Engine</span></div>
+                Operational model system state initialized. Successfully received connection command parameters. Frontend environment interface framework structure operating inside parameters.`, false);
+            }, 800);
+        }
+
+        sendBtn.addEventListener('click', handleSend);
+        userInput.addEventListener('keydown', (e) => { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } });
+    </script>
+</body>
+</html>
 
