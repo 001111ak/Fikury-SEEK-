@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
@@ -191,8 +192,8 @@
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
 
-        // Send Interaction Logic Execution Context Handle Action Routine
-        function handleSend() {
+        // Send Interaction Logic connected directly to Render Backend Server
+        async function handleSend() {
             const queryValue = userInput.value.trim();
             if(!queryValue) return;
 
@@ -200,11 +201,31 @@
             userInput.value = '';
             userInput.style.height = 'auto';
 
-            // Automatic Mock Streaming Generation Response Simulator
-            setTimeout(() => {
+            try {
+                // Firing API post payload pipeline over to Render environment
+                const response = await fetch('https://fikury-backend-1.onrender.com/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: queryValue })
+                });
+                
+                if(!response.ok) {
+                    throw new Error(`Server status callback issue: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // Read response fields fallback defaults cleanly
+                const replyText = data.reply || data.message || "Message processed successfully with clear backend state returns.";
+
                 appendMessage(`<div class="flex items-center space-x-2 text-xs text-brand-500 font-medium mb-1"><i class="fa-solid fa-sparkles"></i> <span>Fikury-SEEK Response Engine</span></div>
-                Operational model system state initialized. Successfully received connection command parameters. Frontend environment interface framework structure operating inside parameters.`, false);
-            }, 800);
+                ${replyText}`, false);
+                
+            } catch (error) {
+                console.error("Error connecting to backend API route:", error);
+                appendMessage(`<div class="flex items-center space-x-2 text-xs text-red-500 font-medium mb-1"><i class="fa-solid fa-circle-exclamation"></i> <span>Connection Error</span></div>
+                Unable to contact the live response gateway engine server. Please verify your Render service logs.`, false);
+            }
         }
 
         sendBtn.addEventListener('click', handleSend);
@@ -213,3 +234,5 @@
 </body>
 </html>
 
+            
+            
