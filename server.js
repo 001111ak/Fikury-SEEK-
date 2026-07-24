@@ -1,86 +1,79 @@
-const express = require('express');
-const cors = require('cors');
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import { GoogleGenAI } from '@google/genai';
+
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-// 1. Enable Cross-Origin Resource Sharing (Allows frontend clients to reach Render backend)
+// Middleware
 app.use(cors());
-
-// 2. Enable JSON body parsing middleware
 app.use(express.json());
 
-// 3. Base health check route
+// Health Check Route
 app.get('/', (req, res) => {
-    res.json({ status: "healthy", message: "Fikury-backend processing engine is running cleanly." });
+    res.json({ status: "healthy", message: "Fikury-backend engine is running cleanly." });
 });
 
-// 4. Main AI Chat Endpoint
+// AI Chat Endpoint
 app.post('/api/chat', async (req, res) => {
     try {
-        // Accepts either 'message' (from UI) or 'prompt' (from ReqBin/Postman)
         const userPrompt = req.body.message || req.body.prompt;
 
-        // Validation guard rail
         if (!userPrompt) {
             return res.status(400).json({ error: "Message or prompt field parameter is missing." });
         }
 
-        console.log(`Received user payload: "${userPrompt}"`);
+        // Accepts GOOGLE_API_KEY or GEMINI_API_KEY from environment
+        const apiKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
 
-        // Get Free Groq API Key from environment variables
-        const apiKey = process.env.GROQ_API_KEY;
         if (!apiKey) {
-            console.error("GROQ_API_KEY environment variable is not configured.");
-            return res.status(500).json({ error: "AI API key missing on backend server." });
+            console.error("API key environment variable is missing on Render.");
+            return res.status(500).json({ error: "API key missing on backend server." });
         }
 
-        // --- FREE GROQ API INTEGRATION (Llama 3.3 70B) ---
-        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${apiKey}`
-            },
-            body: JSON.stringify({
-                model: 'llama-3.3-70b-versatile',
-                messages: [
-                    { 
-                        role: 'system', 
-                        content: 'You are Fikury-SEEK, a highly intelligent, fast, and helpful AI assistant.' 
-                    },
-                    { 
-                        role: 'user', 
-                        content: userPrompt 
-                    }
-                ]
-            })
-        });
+        // Initialize Gemini AI Client
+        const ai = new GoogleGenAI({ apiKey });
 
-        if (!response.ok) {
-            const errorDetails = await response.text();
-            console.error("Groq API Error Details:", errorDetails);
-            return res.status(502).json({ error: "Error communicating with Groq AI service." });
+        // List of models to try in priority order to prevent 404 errors
+        const modelsToTry = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+        let response = null;
+        let lastError = null;
+
+        for (const modelName of modelsToTry) {
+            try {
+                response = await ai.models.generateContent({
+                    model: modelName,
+                    contents: userPrompt,
+                });
+                if (response && response.text) break;
+            } catch (err) {
+                console.warn(`Model ${modelName} unavailable, attempting fallback:`, err.message);
+                lastError = err;
+            }
         }
 
-        const data = await response.json();
-        const automatedReply = data.choices?.[0]?.message?.content || "No response returned from AI model.";
+        if (!response) {
+            throw lastError || new Error("All model fallback attempts failed.");
+        }
 
-        // Send response payload back cleanly
         return res.status(200).json({
-            reply: automatedReply
+            reply: response.text || "No response returned from Gemini."
         });
 
     } catch (error) {
-        console.error("Internal processing fault inside chat pipeline:", error);
-        return res.status(500).json({ error: "Internal core engine operational route failure." });
+        console.error("Chat pipeline error:", error);
+        return res.status(500).json({ 
+            error: "Gemini execution failed", 
+            details: error.message || "Internal core engine operational failure." 
+        });
     }
 });
 
-// Bind listener port
 app.listen(PORT, () => {
-    console.log(`=============================================`);
-    console.log(`🚀 Fikury Core Application Node Live Matrix Running on Port: ${PORT}`);
-    console.log(`=============================================`);
+    console.log(`🚀 Server running on port ${PORT}`);
 });
 
+        
