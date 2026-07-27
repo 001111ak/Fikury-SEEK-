@@ -31,7 +31,7 @@
             --transition: 0.2s ease;
             --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             --max-width: 740px;
-            
+
             /* Custom Attachment UI Colors */
             --attach-btn-bg: #f5f5f5;
             --attach-text: #000000;
@@ -49,7 +49,7 @@
             --accent-light: #9a93ff;
             --border-color: #3a3a5a;
             --shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-            
+
             --attach-btn-bg: #22224a;
             --attach-text: #eaeaf5;
         }
@@ -124,7 +124,7 @@
             box-shadow: 0 2px 8px var(--accent-glow);
             transition: transform 0.3s ease;
         }
-        
+
         .logo-img {
             width: 100%;
             height: 100%;
@@ -206,18 +206,24 @@
             border-radius: 8px;
         }
 
-        .message {
+        .message-wrapper {
             display: flex;
-            max-width: 90%;
+            flex-direction: column;
+            max-width: 92%;
             animation: fadeUp 0.3s ease;
+            position: relative;
         }
 
-        .message.assistant {
+        .message-wrapper.assistant {
             align-self: flex-start;
         }
 
-        .message.user {
+        .message-wrapper.user {
             align-self: flex-end;
+        }
+
+        .message {
+            display: flex;
         }
 
         .message .bubble {
@@ -232,13 +238,13 @@
             transition: background var(--transition);
         }
 
-        .message.user .bubble {
+        .message-wrapper.user .message .bubble {
             background: var(--accent);
             color: #fff;
             border-bottom-right-radius: 4px;
         }
 
-        .message.assistant .bubble {
+        .message-wrapper.assistant .message .bubble {
             border-bottom-left-radius: 4px;
         }
 
@@ -250,7 +256,7 @@
             opacity: 0.7;
             letter-spacing: 0.2px;
         }
-        .message.user .bubble .timestamp {
+        .message-wrapper.user .message .bubble .timestamp {
             color: rgba(255, 255, 255, 0.65);
         }
 
@@ -259,6 +265,105 @@
         }
         .message .bubble p:last-child {
             margin-bottom: 0;
+        }
+
+        /* ----- Message Actions - Professional Floating Style (Gemini-inspired) ----- */
+        .message-actions {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            margin-top: 2px;
+            padding: 2px 4px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            border-radius: 20px;
+            background: var(--bg-secondary);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            border: 1px solid var(--border-color);
+            width: fit-content;
+            position: relative;
+        }
+
+        .message-wrapper:hover .message-actions {
+            opacity: 1;
+        }
+
+        /* For mobile: always show a bit */
+        @media (max-width: 640px) {
+            .message-actions {
+                opacity: 0.6;
+            }
+        }
+
+        .message-actions button {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            padding: 4px 8px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            line-height: 1;
+            font-family: var(--font);
+            font-weight: 500;
+        }
+
+        .message-actions button:hover {
+            background: var(--bg-input);
+            color: var(--text-primary);
+        }
+
+        .message-actions button:active {
+            transform: scale(0.92);
+        }
+
+        .message-actions button i {
+            font-size: 0.85rem;
+        }
+
+        .message-actions button .action-label {
+            font-size: 0.7rem;
+            font-weight: 500;
+            opacity: 0.8;
+            letter-spacing: 0.2px;
+        }
+
+        /* Liked state */
+        .message-actions button.liked {
+            color: #4caf50;
+        }
+        .message-actions button.liked:hover {
+            color: #388e3c;
+            background: rgba(76, 175, 80, 0.08);
+        }
+
+        /* Disliked state */
+        .message-actions button.disliked {
+            color: #f44336;
+        }
+        .message-actions button.disliked:hover {
+            color: #d32f2f;
+            background: rgba(244, 67, 54, 0.08);
+        }
+
+        /* Copied state */
+        .message-actions button.copied {
+            color: var(--accent);
+        }
+        .message-actions button.copied:hover {
+            background: rgba(108, 99, 255, 0.08);
+        }
+
+        /* Divider between buttons */
+        .message-actions .action-divider {
+            width: 1px;
+            height: 20px;
+            background: var(--border-color);
+            opacity: 0.5;
         }
 
         /* Typing indicator */
@@ -280,16 +385,34 @@
             border-radius: 50%;
             animation: pulse 1.3s ease-in-out infinite;
         }
-        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
         @keyframes pulse {
-            0%, 80%, 100% { transform: scale(0.5); opacity: 0.3; }
-            40% { transform: scale(1); opacity: 1; }
+            0%,
+            80%,
+            100% {
+                transform: scale(0.5);
+                opacity: 0.3;
+            }
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
 
         @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* ---------- INPUT WRAPPER & DRAWER ---------- */
@@ -315,7 +438,7 @@
             margin: 0;
             padding: 0;
         }
-        
+
         .attachment-drawer.open {
             opacity: 1;
             transform: translateY(0) scale(1);
@@ -338,15 +461,15 @@
             gap: 10px;
             cursor: pointer;
             transition: all var(--transition);
-            box-shadow: 0 4px 14px rgba(0,0,0,0.03);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
         }
-        
+
         .attachment-drawer .attach-btn:hover {
             transform: translateY(-4px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
             filter: brightness(0.95);
         }
-        
+
         .attachment-drawer .attach-btn svg {
             width: 32px;
             height: 32px;
@@ -356,7 +479,7 @@
             stroke-linecap: round;
             stroke-linejoin: round;
         }
-        
+
         .attachment-drawer .attach-btn span {
             color: var(--attach-text);
             font-size: 1rem;
@@ -460,9 +583,29 @@
         .footer span {
             opacity: 0.7;
         }
-        .footer .dot {
-            color: var(--accent);
-            margin: 0 6px;
+
+        /* ---------- TOAST ---------- */
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            padding: 10px 24px;
+            border-radius: 30px;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+            font-size: 0.85rem;
+            font-weight: 500;
+            border: 1px solid var(--border-color);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
         }
 
         /* ---------- RESPONSIVE ---------- */
@@ -519,6 +662,16 @@
             }
             .attachment-drawer .attach-btn span {
                 font-size: 0.8rem;
+            }
+            .message-actions button {
+                padding: 3px 6px;
+                font-size: 0.7rem;
+            }
+            .message-actions button i {
+                font-size: 0.75rem;
+            }
+            .message-actions button .action-label {
+                font-size: 0.6rem;
             }
         }
 
@@ -578,7 +731,7 @@
             <a class="logo-group" href="#" id="logoHome" title="Fikury-SEEK">
                 <div class="logo-container">
                     <span class="logo-fallback">F</span>
-                    <img class="logo-img" src="1000023673.png" alt="Fikury-SEEK Logo" onerror="this.style.display='none';" />
+                    <img class="logo-img" src="/html.png" alt="Fikury-SEEK Logo" />
                 </div>
                 <span class="logo-text">Fikury<span>-SEEK</span></span>
             </a>
@@ -591,13 +744,18 @@
         </header>
 
         <div class="messages-area" id="messagesArea">
-            <div class="message assistant">
-                <div class="bubble">
-                    <p>👋 Hey there! I'm <strong>Fikury-SEEK</strong>. Ask me anything.</p>
-                    <div class="timestamp">now</div>
+            <div class="message-wrapper assistant" id="welcomeMessage">
+                <div class="message">
+                    <div class="bubble">
+                        <p>👋 Hey there! I'm <strong>Fikury-SEEK</strong>. Ask me anything.</p>
+                        <div class="timestamp">now</div>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- Toast notification -->
+        <div class="toast" id="toast"></div>
 
         <div class="input-wrapper">
             <div class="attachment-drawer" id="attachmentDrawer">
@@ -628,17 +786,16 @@
                 <button class="btn-plus" id="plusBtn" aria-label="Attach">
                     <i class="fas fa-plus"></i>
                 </button>
-                <input type="text" id="chatInput" placeholder="Message Fikury-SEEK…" autocomplete="off" />
+                <input type="text" id="chatInput" placeholder="Type a message…" autocomplete="off" />
                 <button class="btn-send" id="sendBtn" aria-label="Send">
                     <i class="fas fa-arrow-right"></i>
                 </button>
             </div>
         </div>
 
+        <!-- FOOTER -->
         <div class="footer">
-            <span>Fikury-SEEK</span>
-            <span class="dot">•</span>
-            <span>AI assistant</span>
+            <span>Fikury-SEEK is AI and can make mistakes.</span>
         </div>
     </div>
 
@@ -661,14 +818,14 @@
             const cameraBtn = document.getElementById('cameraBtn');
             const photoBtn = document.getElementById('photoBtn');
             const documentBtn = document.getElementById('documentBtn');
-            const fileInput = document.getElementById('fileInput');
             const photoInput = document.getElementById('photoInput');
             const documentInput = document.getElementById('documentInput');
+            const toast = document.getElementById('toast');
 
             // ----- State -----
-            let apiKey = localStorage.getItem('fikury_api_key') || '';
             let conversationHistory = [];
             let isDrawerOpen = false;
+            let toastTimer = null;
 
             // ----- THEME -----
             function getStoredTheme() {
@@ -699,7 +856,6 @@
 
             plusBtn.addEventListener('click', toggleDrawer);
 
-            // Close drawer on outside click
             document.addEventListener('click', function(e) {
                 if (isDrawerOpen) {
                     const wrapper = document.querySelector('.input-wrapper');
@@ -711,6 +867,16 @@
                 }
             });
 
+            // ----- TOAST -----
+            function showToast(message) {
+                toast.textContent = message;
+                toast.classList.add('show');
+                clearTimeout(toastTimer);
+                toastTimer = setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 2000);
+            }
+
             // ----- ATTACHMENT ACTIONS -----
             function closeDrawer() {
                 drawer.classList.remove('open');
@@ -719,7 +885,7 @@
             }
 
             cameraBtn.addEventListener('click', function() {
-                alert('📸 Camera opened (simulated).');
+                showToast('📸 Camera opened (simulated)');
                 closeDrawer();
             });
 
@@ -728,7 +894,7 @@
             });
             photoInput.addEventListener('change', function() {
                 if (this.files && this.files[0]) {
-                    alert(`🖼️ Photo selected: ${this.files[0].name}`);
+                    showToast(`🖼️ Photo selected: ${this.files[0].name}`);
                     this.value = '';
                 }
                 closeDrawer();
@@ -739,48 +905,159 @@
             });
             documentInput.addEventListener('change', function() {
                 if (this.files && this.files[0]) {
-                    alert(`📄 Document selected: ${this.files[0].name}`);
+                    showToast(`📄 Document selected: ${this.files[0].name}`);
                     this.value = '';
                 }
                 closeDrawer();
             });
 
-            // ----- CHAT LOGIC -----
+            // ----- MESSAGE ACTIONS (Professional style) -----
+            function attachMessageActions(wrapper, textContent) {
+                if (wrapper.querySelector('.message-actions')) return;
+
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'message-actions';
+
+                // Copy button
+                const copyBtn = document.createElement('button');
+                copyBtn.innerHTML = '<i class="fas fa-copy"></i><span class="action-label">Copy</span>';
+                copyBtn.setAttribute('title', 'Copy message');
+                copyBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    navigator.clipboard.writeText(textContent).then(() => {
+                        showToast('📋 Copied!');
+                        this.classList.add('copied');
+                        setTimeout(() => this.classList.remove('copied'), 1500);
+                    }).catch(() => {
+                        const textarea = document.createElement('textarea');
+                        textarea.value = textContent;
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textarea);
+                        showToast('📋 Copied!');
+                        this.classList.add('copied');
+                        setTimeout(() => this.classList.remove('copied'), 1500);
+                    });
+                });
+
+                // Divider
+                const div1 = document.createElement('span');
+                div1.className = 'action-divider';
+
+                // Thumbs up
+                const likeBtn = document.createElement('button');
+                likeBtn.innerHTML = '<i class="fas fa-thumbs-up"></i><span class="action-label">Like</span>';
+                likeBtn.setAttribute('title', 'Like');
+                let liked = false;
+                likeBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    liked = !liked;
+                    this.classList.toggle('liked', liked);
+                    if (liked) {
+                        dislikeBtn.classList.remove('disliked');
+                        disliked = false;
+                        showToast('👍 Liked');
+                    } else {
+                        showToast('👍 Like removed');
+                    }
+                });
+
+                // Divider
+                const div2 = document.createElement('span');
+                div2.className = 'action-divider';
+
+                // Thumbs down
+                const dislikeBtn = document.createElement('button');
+                dislikeBtn.innerHTML = '<i class="fas fa-thumbs-down"></i><span class="action-label">Dislike</span>';
+                dislikeBtn.setAttribute('title', 'Dislike');
+                let disliked = false;
+                dislikeBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    disliked = !disliked;
+                    this.classList.toggle('disliked', disliked);
+                    if (disliked) {
+                        likeBtn.classList.remove('liked');
+                        liked = false;
+                        showToast('👎 Disliked');
+                    } else {
+                        showToast('👎 Dislike removed');
+                    }
+                });
+
+                actionsDiv.appendChild(copyBtn);
+                actionsDiv.appendChild(div1);
+                actionsDiv.appendChild(likeBtn);
+                actionsDiv.appendChild(div2);
+                actionsDiv.appendChild(dislikeBtn);
+                wrapper.appendChild(actionsDiv);
+            }
+
+            // ----- ADD MESSAGE (with actions) -----
             function addMessage(role, content) {
+                const wrapper = document.createElement('div');
+                wrapper.className = `message-wrapper ${role}`;
+
                 const msgDiv = document.createElement('div');
-                msgDiv.className = `message ${role}`;
+                msgDiv.className = 'message';
+
                 const bubble = document.createElement('div');
                 bubble.className = 'bubble';
                 const p = document.createElement('p');
                 p.textContent = content;
                 bubble.appendChild(p);
+
                 const ts = document.createElement('div');
                 ts.className = 'timestamp';
                 const now = new Date();
                 ts.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 bubble.appendChild(ts);
+
                 msgDiv.appendChild(bubble);
-                messagesArea.appendChild(msgDiv);
+                wrapper.appendChild(msgDiv);
+
+                attachMessageActions(wrapper, content);
+
+                messagesArea.appendChild(wrapper);
                 messagesArea.scrollTop = messagesArea.scrollHeight;
                 conversationHistory.push({ role, content });
+                return wrapper;
             }
 
+            // Attach actions to the initial welcome message
+            const welcomeWrapper = document.getElementById('welcomeMessage');
+            const welcomeText = '👋 Hey there! I\'m Fikury-SEEK. Ask me anything.';
+            attachMessageActions(welcomeWrapper, welcomeText);
+
             // ----- SEND LOGIC -----
-            async function sendMessage() {
-                const text = chatInput.value.trim();
-                if (!text) return;
+            async function sendMessage(text) {
+                if (!text || text.trim() === '') return;
                 chatInput.value = '';
                 addMessage('user', text);
                 setTimeout(() => {
-                    addMessage('assistant', `Acknowledged! Processing your request regarding "${text}".`);
-                }, 600);
+                    const responses = [
+                        `That's interesting! Tell me more about "${text}".`,
+                        `Got it. Let me think about "${text}" for a moment.`,
+                        `Sure! Here's what I know about "${text}".`,
+                        `Great question! I'll do my best to answer that.`,
+                        `I appreciate you asking about "${text}". Let's dive in.`
+                    ];
+                    const randomIndex = Math.floor(Math.random() * responses.length);
+                    addMessage('assistant', responses[randomIndex]);
+                }, 800);
             }
 
-            sendBtn.addEventListener('click', sendMessage);
+            function handleSend() {
+                const text = chatInput.value.trim();
+                if (!text) return;
+                sendMessage(text);
+            }
+
+            sendBtn.addEventListener('click', handleSend);
             chatInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
-                    sendMessage();
+                    handleSend();
                 }
             });
 
@@ -788,6 +1065,7 @@
                 e.preventDefault();
                 chatInput.focus();
             });
+
         })();
     </script>
 </body>
