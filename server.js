@@ -37,7 +37,7 @@ app.post('/api/chat', async (req, res) => {
         // Initialize Gemini AI Client
         const ai = new GoogleGenAI({ apiKey });
 
-        // ✅ UPDATED: Only use models that are confirmed to work with the SDK
+        // ✅ FIXED: Only use models that are confirmed to work with the SDK
         // 'gemini-2.0-flash' is the recommended fast model; 'gemini-1.5-pro' is a solid fallback
         const modelsToTry = ['gemini-2.0-flash', 'gemini-1.5-pro'];
         let response = null;
