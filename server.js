@@ -37,8 +37,9 @@ app.post('/api/chat', async (req, res) => {
         // Initialize Gemini AI Client
         const ai = new GoogleGenAI({ apiKey });
 
-        // List of models to try in priority order to prevent 404 errors
-        const modelsToTry = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+        // ✅ UPDATED: Only use models that are confirmed to work with the SDK
+        // 'gemini-2.0-flash' is the recommended fast model; 'gemini-1.5-pro' is a solid fallback
+        const modelsToTry = ['gemini-2.0-flash', 'gemini-1.5-pro'];
         let response = null;
         let lastError = null;
 
@@ -75,5 +76,3 @@ app.post('/api/chat', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
 });
-
-        
