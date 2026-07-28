@@ -1,571 +1,748 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fikury-SEEK</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    :root {
-      --bg: #f0f2f5;
-      --surface: rgba(255,255,255,0.7);
-      --surface-solid: #ffffff;
-      --text: #1a1a2e;
-      --text-muted: #6b6b8a;
-      --border: rgba(0,0,0,0.06);
-      --shadow: 0 8px 30px rgba(0,0,0,0.05);
-      --accent: #6c63ff;
-      --accent-hover: #7b73ff;
-      --radius: 24px;
-      --bubble-user: #6c63ff;
-      --bubble-user-text: #fff;
-      --bubble-assistant: #ffffff;
-      --bubble-assistant-text: #1a1a2e;
-      --input-bg: #ffffff;
-      --transition: 0.2s ease;
-    }
-    [data-theme="dark"] {
-      --bg: #0b0b1a;
-      --surface: rgba(30,30,60,0.8);
-      --surface-solid: #1a1a36;
-      --text: #eaeaf5;
-      --text-muted: #8a8aaa;
-      --border: rgba(255,255,255,0.06);
-      --shadow: 0 8px 30px rgba(0,0,0,0.4);
-      --bubble-assistant: #1e1e3e;
-      --bubble-assistant-text: #eaeaf5;
-      --input-bg: #22224a;
-    }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-      transition: background var(--transition), color var(--transition);
-    }
-    .app {
-      max-width: 720px;
-      width: 100%;
-      height: 90vh;
-      max-height: 800px;
-      background: var(--surface);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      border: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      padding: 20px 24px 16px;
-      transition: background var(--transition);
-    }
-    /* Header */
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
-    }
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
-    }
-    .logo-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: var(--accent);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 1.1rem;
-      color: #fff;
-      box-shadow: 0 2px 12px rgba(108,99,255,0.25);
-    }
-    .logo-text {
-      font-size: 1.2rem;
-      font-weight: 700;
-      letter-spacing: -0.3px;
-    }
-    .logo-text span { font-weight: 300; color: var(--text-muted); }
-    .header-actions { display: flex; gap: 6px; }
-    .icon-btn {
-      background: transparent;
-      border: none;
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-muted);
-      font-size: 1rem;
-      cursor: pointer;
-      transition: all var(--transition);
-    }
-    .icon-btn:hover { background: var(--border); color: var(--text); }
-
-    /* Messages */
-    .messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 16px 0 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      scroll-behavior: smooth;
-    }
-    .messages::-webkit-scrollbar { width: 4px; }
-    .messages::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 8px; }
-
-    .msg {
-      display: flex;
-      flex-direction: column;
-      max-width: 88%;
-      animation: fadeUp 0.25s ease;
-    }
-    .msg.user { align-self: flex-end; }
-    .msg.assistant { align-self: flex-start; }
-
-    .bubble {
-      padding: 12px 18px;
-      border-radius: 20px;
-      font-size: 0.95rem;
-      line-height: 1.6;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-      word-wrap: break-word;
-      transition: background var(--transition), color var(--transition);
-    }
-    .msg.user .bubble {
-      background: var(--bubble-user);
-      color: var(--bubble-user-text);
-      border-bottom-right-radius: 4px;
-    }
-    .msg.assistant .bubble {
-      background: var(--bubble-assistant);
-      color: var(--bubble-assistant-text);
-      border-bottom-left-radius: 4px;
-    }
-    .timestamp {
-      font-size: 0.6rem;
-      color: var(--text-muted);
-      margin-top: 4px;
-      opacity: 0.7;
-      text-align: right;
-      padding: 0 4px;
-    }
-    .msg.user .timestamp { color: rgba(255,255,255,0.6); }
-
-    /* Typing */
-    .typing {
-      display: flex;
-      gap: 4px;
-      padding: 8px 16px;
-    }
-    .typing span {
-      width: 8px;
-      height: 8px;
-      background: var(--text-muted);
-      border-radius: 50%;
-      animation: pulse 1.3s infinite;
-    }
-    .typing span:nth-child(2) { animation-delay: 0.2s; }
-    .typing span:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes pulse {
-      0%,80%,100% { transform: scale(0.5); opacity: 0.3; }
-      40% { transform: scale(1); opacity: 1; }
-    }
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Input */
-    .input-area {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      flex-shrink: 0;
-      padding-top: 12px;
-      border-top: 1px solid var(--border);
-    }
-    .input-bar {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--input-bg);
-      border-radius: 40px;
-      padding: 2px 2px 2px 16px;
-      border: 2px solid transparent;
-      transition: all var(--transition);
-    }
-    .input-bar:focus-within {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 4px rgba(108,99,255,0.12);
-    }
-    .input-bar input {
-      flex: 1;
-      background: transparent;
-      border: none;
-      outline: none;
-      padding: 12px 0;
-      font-size: 0.95rem;
-      color: var(--text);
-      font-family: inherit;
-      min-width: 0;
-    }
-    .input-bar input::placeholder { color: var(--text-muted); }
-    .input-bar .btn {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.1rem;
-      cursor: pointer;
-      transition: all var(--transition);
-      flex-shrink: 0;
-    }
-    .input-bar .btn:hover { background: var(--border); color: var(--text); }
-    .input-bar .btn-send {
-      background: var(--accent);
-      color: #fff;
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      font-size: 1.1rem;
-      border: none;
-      cursor: pointer;
-      transition: all var(--transition);
-      flex-shrink: 0;
-    }
-    .input-bar .btn-send:hover { background: var(--accent-hover); transform: scale(1.03); }
-    .input-bar .btn-send.stop { background: #e74c3c; }
-
-    .footer {
-      text-align: center;
-      font-size: 0.65rem;
-      color: var(--text-muted);
-      padding-top: 10px;
-      opacity: 0.6;
-    }
-
-    /* Toast */
-    .toast {
-      position: fixed;
-      bottom: 100px;
-      left: 50%;
-      transform: translateX(-50%) translateY(20px);
-      background: var(--surface-solid);
-      color: var(--text);
-      padding: 8px 20px;
-      border-radius: 30px;
-      box-shadow: 0 6px 24px rgba(0,0,0,0.1);
-      font-size: 0.85rem;
-      border: 1px solid var(--border);
-      opacity: 0;
-      pointer-events: none;
-      transition: all 0.3s ease;
-      z-index: 999;
-    }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-    /* Drawer */
-    .drawer {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: center;
-      opacity: 0;
-      max-height: 0;
-      overflow: hidden;
-      transition: all 0.25s ease;
-    }
-    .drawer.open {
-      opacity: 1;
-      max-height: 200px;
-      padding: 8px 0 12px;
-    }
-    .drawer .attach-btn {
-      background: var(--input-bg);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      width: 72px;
-      height: 72px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      cursor: pointer;
-      transition: all var(--transition);
-      color: var(--text);
-      font-size: 0.7rem;
-      font-weight: 500;
-    }
-    .drawer .attach-btn:hover { transform: translateY(-2px); background: var(--border); }
-    .drawer .attach-btn i { font-size: 1.5rem; color: var(--accent); }
-    .drawer .attach-btn span { max-width: 60px; word-wrap: break-word; text-align: center; line-height: 1.2; }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fikury-SEEK · AI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        /* (same styles as before – keep them) */
+        * { margin:0; padding:0; box-sizing:border-box; }
+        :root {
+            --bg: #f0f2f5;
+            --surface: rgba(255,255,255,0.75);
+            --surface-solid: #ffffff;
+            --text: #1a1a2e;
+            --text-muted: #6b6b8a;
+            --border: rgba(0,0,0,0.06);
+            --shadow: 0 8px 32px rgba(0,0,0,0.04);
+            --accent: #6c63ff;
+            --accent-hover: #7b73ff;
+            --radius: 24px;
+            --bubble-user: #6c63ff;
+            --bubble-user-text: #fff;
+            --bubble-assistant: #ffffff;
+            --input-bg: #ffffff;
+            --transition: 0.2s ease;
+        }
+        [data-theme="dark"] {
+            --bg: #0b0b1a;
+            --surface: rgba(30,30,60,0.8);
+            --surface-solid: #1a1a36;
+            --text: #eaeaf5;
+            --text-muted: #8a8aaa;
+            --border: rgba(255,255,255,0.06);
+            --shadow: 0 8px 32px rgba(0,0,0,0.5);
+            --bubble-assistant: #1e1e3e;
+            --input-bg: #22224a;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            transition: background var(--transition), color var(--transition);
+        }
+        .app {
+            max-width: 720px;
+            width: 100%;
+            height: 90vh;
+            max-height: 800px;
+            background: var(--surface);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 20px 24px 16px;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #fff;
+            box-shadow: 0 2px 12px rgba(108,99,255,0.25);
+        }
+        .logo-text {
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+        .logo-text span { font-weight: 300; color: var(--text-muted); }
+        .header-actions { display: flex; gap: 6px; }
+        .icon-btn {
+            background: transparent;
+            border: none;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+        .icon-btn:hover { background: var(--border); color: var(--text); }
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 0 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            scroll-behavior: smooth;
+        }
+        .messages::-webkit-scrollbar { width: 4px; }
+        .messages::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 8px; }
+        .msg {
+            display: flex;
+            flex-direction: column;
+            max-width: 88%;
+            animation: fadeUp 0.25s ease;
+        }
+        .msg.user { align-self: flex-end; }
+        .msg.assistant { align-self: flex-start; }
+        .bubble {
+            padding: 12px 18px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            word-wrap: break-word;
+            transition: background var(--transition), color var(--transition);
+        }
+        .msg.user .bubble {
+            background: var(--bubble-user);
+            color: var(--bubble-user-text);
+            border-bottom-right-radius: 4px;
+        }
+        .msg.assistant .bubble {
+            background: var(--bubble-assistant);
+            color: var(--text);
+            border-bottom-left-radius: 4px;
+        }
+        .timestamp {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            opacity: 0.7;
+            text-align: right;
+            padding: 0 4px;
+        }
+        .msg.user .timestamp { color: rgba(255,255,255,0.6); }
+        .typing {
+            display: flex;
+            gap: 4px;
+            padding: 8px 16px;
+        }
+        .typing span {
+            width: 8px;
+            height: 8px;
+            background: var(--text-muted);
+            border-radius: 50%;
+            animation: pulse 1.3s infinite;
+        }
+        .typing span:nth-child(2) { animation-delay: 0.2s; }
+        .typing span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes pulse {
+            0%,80%,100% { transform: scale(0.5); opacity: 0.3; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .input-area {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex-shrink: 0;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+        }
+        .drawer {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.25s ease;
+        }
+        .drawer.open {
+            opacity: 1;
+            max-height: 200px;
+            padding: 8px 0 12px;
+        }
+        .drawer .attach-btn {
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: all var(--transition);
+            color: var(--text);
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+        .drawer .attach-btn:hover { transform: translateY(-2px); background: var(--border); }
+        .drawer .attach-btn i { font-size: 1.4rem; color: var(--accent); }
+        .drawer .attach-btn span { max-width: 60px; word-wrap: break-word; text-align: center; line-height: 1.2; }
+        .input-bar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--input-bg);
+            border-radius: 40px;
+            padding: 2px 2px 2px 16px;
+            border: 2px solid transparent;
+            transition: all var(--transition);
+        }
+        .input-bar:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(108,99,255,0.12);
+        }
+        .input-bar input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            padding: 12px 0;
+            font-size: 0.95rem;
+            color: var(--text);
+            font-family: inherit;
+            min-width: 0;
+        }
+        .input-bar input::placeholder { color: var(--text-muted); }
+        .input-bar .btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all var(--transition);
+            flex-shrink: 0;
+        }
+        .input-bar .btn:hover { background: var(--border); color: var(--text); }
+        .input-bar .btn-send {
+            background: var(--accent);
+            color: #fff;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            font-size: 1.1rem;
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition);
+            flex-shrink: 0;
+        }
+        .input-bar .btn-send:hover { background: var(--accent-hover); transform: scale(1.03); }
+        .input-bar .btn-send.stop { background: #e74c3c; }
+        .footer {
+            text-align: center;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            padding-top: 10px;
+            opacity: 0.6;
+        }
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: var(--surface-solid);
+            color: var(--text);
+            padding: 8px 20px;
+            border-radius: 30px;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.1);
+            font-size: 0.85rem;
+            border: 1px solid var(--border);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        #fileInput { display: none; }
+    </style>
 </head>
 <body>
-<div class="app">
-  <!-- Header -->
-  <header class="header">
-    <a class="logo" href="#">
-      <div class="logo-icon">F</div>
-      <span class="logo-text">Fikury<span>-SEEK</span></span>
-    </a>
-    <div class="header-actions">
-      <button class="icon-btn" id="newChatBtn" title="New Chat"><i class="fas fa-plus-circle"></i></button>
-      <button class="icon-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
-    </div>
-  </header>
+<div class="app" id="app">
+    <header class="header">
+        <a class="logo" href="#">
+            <div class="logo-icon">F</div>
+            <span class="logo-text">Fikury<span>-SEEK</span></span>
+        </a>
+        <div class="header-actions">
+            <button class="icon-btn" id="newChatBtn" title="New Chat"><i class="fas fa-plus-circle"></i></button>
+            <button class="icon-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
+        </div>
+    </header>
 
-  <!-- Messages -->
-  <div class="messages" id="messages">
-    <div class="msg assistant" id="welcome">
-      <div class="bubble">👋 Hey there! I'm <strong>Fikury-SEEK</strong>. Ask me anything.</div>
-      <div class="timestamp">now</div>
-    </div>
-  </div>
-
-  <!-- Toast -->
-  <div class="toast" id="toast"></div>
-
-  <!-- Input -->
-  <div class="input-area">
-    <!-- Drawer -->
-    <div class="drawer" id="drawer">
-      <button class="attach-btn" id="cameraBtn"><i class="fas fa-camera"></i><span>Camera</span></button>
-      <button class="attach-btn" id="photoBtn"><i class="fas fa-image"></i><span>Photo</span></button>
-      <button class="attach-btn" id="documentBtn"><i class="fas fa-file"></i><span>Doc</span></button>
-      <button class="attach-btn" id="ttsToggle"><i class="fas fa-volume-up"></i><span>Speak</span></button>
-      <button class="attach-btn" id="ttsSpeed"><i class="fas fa-tachometer-alt"></i><span>Speed</span></button>
+    <div class="messages" id="messages">
+        <div class="msg assistant" id="welcome">
+            <div class="bubble">👋 Hey! I'm <strong>Fikury-SEEK</strong>. Ask me anything or snap a photo.</div>
+            <div class="timestamp">now</div>
+        </div>
     </div>
 
-    <div class="input-bar">
-      <button class="btn" id="plusBtn"><i class="fas fa-plus"></i></button>
-      <input type="text" id="chatInput" placeholder="Type a message…" autocomplete="off" />
-      <button class="btn" id="voiceBtn"><i class="fas fa-microphone"></i></button>
-      <button class="btn-send" id="sendBtn"><i class="fas fa-arrow-right"></i></button>
+    <div class="toast" id="toast"></div>
+
+    <div class="input-area">
+        <div class="drawer" id="drawer">
+            <button class="attach-btn" id="cameraBtn"><i class="fas fa-camera"></i><span>Camera</span></button>
+            <button class="attach-btn" id="photoBtn"><i class="fas fa-image"></i><span>Photo</span></button>
+            <button class="attach-btn" id="documentBtn"><i class="fas fa-file"></i><span>Doc</span></button>
+            <button class="attach-btn" id="ttsToggle"><i class="fas fa-volume-up"></i><span>Speak</span></button>
+            <button class="attach-btn" id="ttsSpeed"><i class="fas fa-tachometer-alt"></i><span>Speed</span></button>
+        </div>
+
+        <div class="input-bar">
+            <button class="btn" id="plusBtn"><i class="fas fa-plus"></i></button>
+            <input type="text" id="chatInput" placeholder="Type a message…" autocomplete="off" />
+            <button class="btn" id="voiceBtn"><i class="fas fa-microphone"></i></button>
+            <button class="btn-send" id="sendBtn"><i class="fas fa-arrow-right"></i></button>
+        </div>
+        <div class="footer">Fikury-SEEK is AI and can make mistakes.</div>
     </div>
-    <div class="footer">Fikury-SEEK is AI and can make mistakes.</div>
-  </div>
 </div>
 
+<input type="file" id="fileInput" accept="image/*, .pdf, .doc, .docx, .txt" />
+
 <script>
-  // ----- CONFIG -----
-  const BACKEND = 'https://fikury-backend-1.onrender.com';
+    // ===== CONFIG =====
+    const BACKEND = 'https://fikury-backend-1.onrender.com';
 
-  // ----- DOM -----
-  const messages = document.getElementById('messages');
-  const input = document.getElementById('chatInput');
-  const sendBtn = document.getElementById('sendBtn');
-  const plusBtn = document.getElementById('plusBtn');
-  const drawer = document.getElementById('drawer');
-  const toast = document.getElementById('toast');
-  const themeToggle = document.getElementById('themeToggle');
-  const newChatBtn = document.getElementById('newChatBtn');
-  const voiceBtn = document.getElementById('voiceBtn');
+    // ===== DOM =====
+    const messages = document.getElementById('messages');
+    const input = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const plusBtn = document.getElementById('plusBtn');
+    const drawer = document.getElementById('drawer');
+    const toast = document.getElementById('toast');
+    const themeToggle = document.getElementById('themeToggle');
+    const newChatBtn = document.getElementById('newChatBtn');
+    const voiceBtn = document.getElementById('voiceBtn');
+    const fileInput = document.getElementById('fileInput');
 
-  // ----- STATE -----
-  let isDrawerOpen = false;
-  let toastTimer = null;
-  let abortController = null;
-  let ttsEnabled = false;
-  let ttsSpeed = 1.0;
-  const speedOptions = [0.8, 1.0, 1.2, 1.5];
-  let speedIndex = 1;
+    // ===== STATE =====
+    let isDrawerOpen = false;
+    let toastTimer = null;
+    let abortController = null;
+    let ttsEnabled = false;
+    let ttsSpeed = 1.0;
+    const speedOptions = [0.8, 1.0, 1.2, 1.5];
+    let speedIndex = 1;
 
-  // ----- THEME -----
-  function applyTheme(theme) {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
-    const icon = themeToggle.querySelector('i');
-    icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-  }
-  applyTheme(localStorage.getItem('theme') || 'light');
-  themeToggle.addEventListener('click', () => {
-    const current = document.documentElement.getAttribute('data-theme');
-    applyTheme(current === 'dark' ? 'light' : 'dark');
-  });
-
-  // ----- TOAST -----
-  function showToast(msg) {
-    toast.textContent = msg;
-    toast.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => toast.classList.remove('show'), 2000);
-  }
-
-  // ----- NEW CHAT -----
-  newChatBtn.addEventListener('click', () => {
-    document.querySelectorAll('.msg:not(#welcome)').forEach(el => el.remove());
-    showToast('🗑️ New chat');
-  });
-
-  // ----- DRAWER -----
-  plusBtn.addEventListener('click', () => {
-    isDrawerOpen = !isDrawerOpen;
-    drawer.classList.toggle('open', isDrawerOpen);
-    plusBtn.classList.toggle('active', isDrawerOpen);
-  });
-  document.addEventListener('click', (e) => {
-    if (isDrawerOpen && !e.target.closest('.input-area')) {
-      drawer.classList.remove('open');
-      isDrawerOpen = false;
-      plusBtn.classList.remove('active');
+    // ===== THEME =====
+    function applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        const icon = themeToggle.querySelector('i');
+        icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
     }
-  });
+    applyTheme(localStorage.getItem('theme') || 'light');
+    themeToggle.addEventListener('click', () => {
+        const current = document.documentElement.getAttribute('data-theme');
+        applyTheme(current === 'dark' ? 'light' : 'dark');
+    });
 
-  // ----- ATTACHMENTS (demo) -----
-  document.getElementById('cameraBtn').addEventListener('click', () => showToast('📸 Camera coming soon'));
-  document.getElementById('photoBtn').addEventListener('click', () => showToast('🖼️ Photo upload coming soon'));
-  document.getElementById('documentBtn').addEventListener('click', () => showToast('📄 Document upload coming soon'));
-  document.getElementById('ttsToggle').addEventListener('click', () => {
-    ttsEnabled = !ttsEnabled;
-    showToast(ttsEnabled ? '🔊 Auto-speak ON' : '🔇 OFF');
-  });
-  document.getElementById('ttsSpeed').addEventListener('click', () => {
-    speedIndex = (speedIndex + 1) % speedOptions.length;
-    ttsSpeed = speedOptions[speedIndex];
-    showToast(`⚡ Speed: ${['Slow','Normal','Fast','Very Fast'][speedIndex]}`);
-  });
-
-  // ----- ADD MESSAGE -----
-  function addMessage(role, content) {
-    const wrapper = document.createElement('div');
-    wrapper.className = `msg ${role}`;
-    const bubble = document.createElement('div');
-    bubble.className = 'bubble';
-    bubble.textContent = content;
-    wrapper.appendChild(bubble);
-    const ts = document.createElement('div');
-    ts.className = 'timestamp';
-    ts.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    wrapper.appendChild(ts);
-    messages.appendChild(wrapper);
-    messages.scrollTop = messages.scrollHeight;
-    return wrapper;
-  }
-
-  // ----- SEND -----
-  function updateSendButton(isLoading) {
-    if (isLoading) {
-      sendBtn.innerHTML = '<i class="fas fa-stop"></i>';
-      sendBtn.classList.add('stop');
-    } else {
-      sendBtn.innerHTML = '<i class="fas fa-arrow-right"></i>';
-      sendBtn.classList.remove('stop');
+    // ===== TOAST =====
+    function showToast(msg) {
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
     }
-  }
 
-  async function sendMessage(text) {
-    if (!text.trim()) return;
-    if (abortController) {
-      abortController.abort();
-      abortController = null;
-      updateSendButton(false);
-      return;
-    }
-    input.value = '';
-    addMessage('user', text);
+    // ===== NEW CHAT =====
+    newChatBtn.addEventListener('click', () => {
+        document.querySelectorAll('.msg:not(#welcome)').forEach(el => el.remove());
+        showToast('🗑️ New chat');
+    });
 
-    // Typing
-    const typingWrapper = document.createElement('div');
-    typingWrapper.className = 'msg assistant';
-    typingWrapper.id = 'typing';
-    const bubble = document.createElement('div');
-    bubble.className = 'bubble typing';
-    bubble.innerHTML = '<span></span><span></span><span></span>';
-    typingWrapper.appendChild(bubble);
-    messages.appendChild(typingWrapper);
-    messages.scrollTop = messages.scrollHeight;
-
-    abortController = new AbortController();
-    updateSendButton(true);
-
-    try {
-      const resp = await fetch(`${BACKEND}/api/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: text }),
-        signal: abortController.signal
-      });
-      document.getElementById('typing')?.remove();
-      if (!resp.ok) throw new Error((await resp.json()).error || 'Server error');
-      const data = await resp.json();
-      const reply = data.reply || 'No response.';
-      addMessage('assistant', reply);
-      if (ttsEnabled && 'speechSynthesis' in window) {
-        const utter = new SpeechSynthesisUtterance(reply);
-        utter.rate = ttsSpeed;
-        window.speechSynthesis.speak(utter);
-      }
-    } catch (err) {
-      document.getElementById('typing')?.remove();
-      if (err.name === 'AbortError') {
-        showToast('⏹️ Stopped');
-        return;
-      }
-      console.error(err);
-      showToast('⚠️ Error');
-      addMessage('assistant', '⚠️ Sorry, I encountered an error. Please try again.');
-    } finally {
-      abortController = null;
-      updateSendButton(false);
-    }
-  }
-
-  sendBtn.addEventListener('click', () => sendMessage(input.value));
-  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); sendMessage(input.value); } });
-
-  // ----- VOICE (demo) -----
-  let recognition = null;
-  let listening = false;
-  voiceBtn.addEventListener('click', () => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) { showToast('⚠️ Voice not supported'); return; }
-    if (!recognition) {
-      recognition = new SpeechRecognition();
-      recognition.lang = 'en-US';
-      recognition.interimResults = true;
-      recognition.onresult = (e) => {
-        let final = '';
-        for (let i = e.resultIndex; i < e.results.length; i++) {
-          if (e.results[i].isFinal) final += e.results[i][0].transcript;
-          else input.value = e.results[i][0].transcript;
+    // ===== DRAWER =====
+    plusBtn.addEventListener('click', () => {
+        isDrawerOpen = !isDrawerOpen;
+        drawer.classList.toggle('open', isDrawerOpen);
+        plusBtn.classList.toggle('active', isDrawerOpen);
+    });
+    document.addEventListener('click', (e) => {
+        if (isDrawerOpen && !e.target.closest('.input-area')) {
+            drawer.classList.remove('open');
+            isDrawerOpen = false;
+            plusBtn.classList.remove('active');
         }
-        if (final) { input.value = final; recognition.stop(); }
-      };
-      recognition.onend = () => { listening = false; voiceBtn.classList.remove('listening'); };
-      recognition.onerror = () => { listening = false; voiceBtn.classList.remove('listening'); showToast('⚠️ Voice error'); };
-    }
-    if (listening) { recognition.stop(); return; }
-    recognition.start();
-    listening = true;
-    voiceBtn.classList.add('listening');
-    showToast('🎤 Listening...');
-  });
+    });
 
-  // Welcome message actions (copy)
-  // we add basic actions later – but this is fine for now.
+    // ===== TTS =====
+    document.getElementById('ttsToggle').addEventListener('click', () => {
+        ttsEnabled = !ttsEnabled;
+        showToast(ttsEnabled ? '🔊 Auto-speak ON' : '🔇 OFF');
+    });
+    document.getElementById('ttsSpeed').addEventListener('click', () => {
+        speedIndex = (speedIndex + 1) % speedOptions.length;
+        ttsSpeed = speedOptions[speedIndex];
+        showToast(`⚡ Speed: ${['Slow','Normal','Fast','Very Fast'][speedIndex]}`);
+    });
+
+    // ===== ADD MESSAGE =====
+    function addMessage(role, content) {
+        const wrapper = document.createElement('div');
+        wrapper.className = `msg ${role}`;
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble';
+        bubble.textContent = content;
+        wrapper.appendChild(bubble);
+        const ts = document.createElement('div');
+        ts.className = 'timestamp';
+        ts.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        wrapper.appendChild(ts);
+        messages.appendChild(wrapper);
+        messages.scrollTop = messages.scrollHeight;
+        if (role === 'assistant' && ttsEnabled && 'speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(content);
+            utterance.rate = ttsSpeed;
+            window.speechSynthesis.speak(utterance);
+        }
+        return wrapper;
+    }
+
+    // ===== SEND TEXT =====
+    function updateSendButton(isLoading) {
+        if (isLoading) {
+            sendBtn.innerHTML = '<i class="fas fa-stop"></i>';
+            sendBtn.classList.add('stop');
+        } else {
+            sendBtn.innerHTML = '<i class="fas fa-arrow-right"></i>';
+            sendBtn.classList.remove('stop');
+        }
+    }
+
+    async function sendMessage(text) {
+        if (!text.trim()) return;
+        if (abortController) {
+            abortController.abort();
+            abortController = null;
+            updateSendButton(false);
+            return;
+        }
+        input.value = '';
+        addMessage('user', text);
+
+        // Typing
+        const typingWrapper = document.createElement('div');
+        typingWrapper.className = 'msg assistant';
+        typingWrapper.id = 'typing';
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble typing';
+        bubble.innerHTML = '<span></span><span></span><span></span>';
+        typingWrapper.appendChild(bubble);
+        messages.appendChild(typingWrapper);
+        messages.scrollTop = messages.scrollHeight;
+
+        abortController = new AbortController();
+        updateSendButton(true);
+
+        try {
+            const resp = await fetch(`${BACKEND}/api/chat`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: text }),
+                signal: abortController.signal
+            });
+            document.getElementById('typing')?.remove();
+            if (!resp.ok) throw new Error((await resp.json()).error || 'Server error');
+            const data = await resp.json();
+            const reply = data.reply || 'No response.';
+            addMessage('assistant', reply);
+        } catch (err) {
+            document.getElementById('typing')?.remove();
+            if (err.name === 'AbortError') {
+                showToast('⏹️ Stopped');
+                return;
+            }
+            console.error(err);
+            showToast('⚠️ Error');
+            addMessage('assistant', '⚠️ Sorry, I encountered an error. Please try again.');
+        } finally {
+            abortController = null;
+            updateSendButton(false);
+        }
+    }
+
+    // ===== VISION (image) =====
+    async function sendVision(imageBase64, promptText) {
+        if (!imageBase64) return;
+        const userMsg = promptText ? `📷 "${promptText}"` : '📷 Image';
+        addMessage('user', userMsg);
+
+        const typingWrapper = document.createElement('div');
+        typingWrapper.className = 'msg assistant';
+        typingWrapper.id = 'typing';
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble typing';
+        bubble.innerHTML = '<span></span><span></span><span></span>';
+        typingWrapper.appendChild(bubble);
+        messages.appendChild(typingWrapper);
+        messages.scrollTop = messages.scrollHeight;
+
+        try {
+            const resp = await fetch(`${BACKEND}/api/vision`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    image: imageBase64,
+                    prompt: promptText || 'What do you see in this image?'
+                })
+            });
+            document.getElementById('typing')?.remove();
+            if (!resp.ok) {
+                const errData = await resp.json();
+                throw new Error(errData.error || 'Vision error');
+            }
+            const data = await resp.json();
+            addMessage('assistant', data.reply || 'No analysis.');
+        } catch (err) {
+            document.getElementById('typing')?.remove();
+            console.error('Vision error:', err);
+            showToast('⚠️ Vision error: ' + err.message);
+            addMessage('assistant', '⚠️ Could not analyze the image: ' + err.message);
+        }
+    }
+
+    // ===== CAMERA =====
+    document.getElementById('cameraBtn').addEventListener('click', async function() {
+        closeDrawer();
+        console.log('Camera button clicked');
+        try {
+            // Check if getUserMedia is supported
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                throw new Error('getUserMedia not supported in this browser.');
+            }
+
+            showToast('📸 Opening camera...');
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 480 } }
+            });
+
+            // Create a video element to capture frame
+            const video = document.createElement('video');
+            video.srcObject = stream;
+            video.setAttribute('playsinline', ''); // needed for iOS
+            video.play();
+
+            // Wait for video to be ready
+            await new Promise((resolve) => {
+                video.onloadedmetadata = () => {
+                    video.width = video.videoWidth;
+                    video.height = video.videoHeight;
+                    resolve();
+                };
+            });
+
+            // Draw frame onto canvas
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 480;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Get base64 (without the data:image/jpeg;base64, prefix)
+            const base64 = canvas.toDataURL('image/jpeg', 0.9).split(',')[1];
+
+            // Stop all tracks
+            stream.getTracks().forEach(track => track.stop());
+
+            // Clear video element
+            video.remove();
+
+            if (!base64) throw new Error('Failed to capture image.');
+
+            showToast('📸 Captured! Analyzing...');
+
+            // Get optional prompt from input
+            const prompt = input.value.trim() || '';
+            input.value = '';
+
+            // Send to vision endpoint
+            await sendVision(base64, prompt);
+
+        } catch (err) {
+            console.error('Camera error:', err);
+            showToast('⚠️ Camera error: ' + err.message);
+        }
+    });
+
+    // ===== PHOTO UPLOAD =====
+    document.getElementById('photoBtn').addEventListener('click', () => {
+        closeDrawer();
+        fileInput.accept = 'image/*';
+        fileInput.click();
+    });
+
+    // ===== DOCUMENT UPLOAD (placeholder) =====
+    document.getElementById('documentBtn').addEventListener('click', () => {
+        closeDrawer();
+        fileInput.accept = '.pdf,.doc,.docx,.txt';
+        fileInput.click();
+    });
+
+    // ===== FILE INPUT HANDLER =====
+    fileInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        fileInput.value = ''; // reset so same file can be re-selected
+
+        console.log('File selected:', file.name, file.type);
+
+        // If it's an image, treat as vision
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const base64 = ev.target.result.split(',')[1];
+                const prompt = input.value.trim() || '';
+                input.value = '';
+                sendVision(base64, prompt);
+            };
+            reader.onerror = (err) => {
+                console.error('FileReader error:', err);
+                showToast('⚠️ Failed to read image.');
+            };
+            reader.readAsDataURL(file);
+        } else {
+            // For documents, show placeholder
+            showToast(`📄 Received: ${file.name} (document processing not implemented)`);
+            addMessage('user', `📄 Uploaded: ${file.name}`);
+            addMessage('assistant', 'Document processing is not yet implemented, but you can upload images for AI analysis.');
+        }
+    });
+
+    function closeDrawer() {
+        drawer.classList.remove('open');
+        isDrawerOpen = false;
+        plusBtn.classList.remove('active');
+    }
+
+    // ===== SEND BUTTON =====
+    sendBtn.addEventListener('click', () => {
+        const text = input.value.trim();
+        if (text) sendMessage(text);
+    });
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const text = input.value.trim();
+            if (text) sendMessage(text);
+        }
+    });
+
+    // ===== VOICE =====
+    let recognition = null;
+    let listening = false;
+    voiceBtn.addEventListener('click', () => {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            showToast('⚠️ Voice input not supported in this browser.');
+            return;
+        }
+        if (!recognition) {
+            recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.interimResults = true;
+            recognition.continuous = false;
+            recognition.onresult = (e) => {
+                let final = '';
+                let interim = '';
+                for (let i = e.resultIndex; i < e.results.length; i++) {
+                    const transcript = e.results[i][0].transcript;
+                    if (e.results[i].isFinal) final += transcript;
+                    else interim += transcript;
+                }
+                if (interim) input.value = interim;
+                if (final) {
+                    input.value = final;
+                    recognition.stop();
+                    // Optionally auto-send after a short delay:
+                    setTimeout(() => {
+                        const text = input.value.trim();
+                        if (text) sendMessage(text);
+                    }, 300);
+                }
+            };
+            recognition.onend = () => {
+                listening = false;
+                voiceBtn.classList.remove('listening');
+                showToast('🎤 Stopped listening');
+            };
+            recognition.onerror = (event) => {
+                console.error('Speech error:', event);
+                listening = false;
+                voiceBtn.classList.remove('listening');
+                showToast('⚠️ Voice error: ' + event.error);
+            };
+        }
+        if (listening) {
+            recognition.stop();
+            return;
+        }
+        try {
+            recognition.start();
+            listening = true;
+            voiceBtn.classList.add('listening');
+            showToast('🎤 Listening...');
+        } catch (e) {
+            console.error('Start error:', e);
+            showToast('⚠️ Could not start voice.');
+        }
+    });
+
+    // ===== WELCOME ACTIONS =====
+    // (optional)
+    console.log('🚀 Fikury-SEEK fully loaded.');
+    console.log('Backend URL:', BACKEND);
 </script>
 </body>
 </html>
