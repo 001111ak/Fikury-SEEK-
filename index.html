@@ -6,7 +6,6 @@
     <title>Fikury-SEEK · AI</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <style>
-        /* (same styles as before – keep them) */
         * { margin:0; padding:0; box-sizing:border-box; }
         :root {
             --bg: #f0f2f5;
@@ -76,26 +75,37 @@
             align-items: center;
             gap: 10px;
             text-decoration: none;
+            cursor: pointer;
         }
-        .logo-icon {
-            width: 36px;
-            height: 36px;
+        .logo-container {
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
             background: var(--accent);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 700;
-            font-size: 1.1rem;
-            color: #fff;
             box-shadow: 0 2px 12px rgba(108,99,255,0.25);
+            flex-shrink: 0;
+            transition: transform 0.2s ease;
+        }
+        .logo-container:hover {
+            transform: scale(1.05);
+        }
+        .logo-container svg {
+            display: block;
+            width: 36px;
+            height: 36px;
         }
         .logo-text {
             font-size: 1.2rem;
             font-weight: 700;
             letter-spacing: -0.3px;
         }
-        .logo-text span { font-weight: 300; color: var(--text-muted); }
+        .logo-text span {
+            font-weight: 300;
+            color: var(--text-muted);
+        }
         .header-actions { display: flex; gap: 6px; }
         .icon-btn {
             background: transparent;
@@ -112,6 +122,7 @@
             transition: all var(--transition);
         }
         .icon-btn:hover { background: var(--border); color: var(--text); }
+
         .messages {
             flex: 1;
             overflow-y: auto;
@@ -123,6 +134,7 @@
         }
         .messages::-webkit-scrollbar { width: 4px; }
         .messages::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 8px; }
+
         .msg {
             display: flex;
             flex-direction: column;
@@ -131,6 +143,7 @@
         }
         .msg.user { align-self: flex-end; }
         .msg.assistant { align-self: flex-start; }
+
         .bubble {
             padding: 12px 18px;
             border-radius: 20px;
@@ -159,6 +172,7 @@
             padding: 0 4px;
         }
         .msg.user .timestamp { color: rgba(255,255,255,0.6); }
+
         .typing {
             display: flex;
             gap: 4px;
@@ -181,6 +195,7 @@
             from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
         .input-area {
             display: flex;
             flex-direction: column;
@@ -224,6 +239,7 @@
         .drawer .attach-btn:hover { transform: translateY(-2px); background: var(--border); }
         .drawer .attach-btn i { font-size: 1.4rem; color: var(--accent); }
         .drawer .attach-btn span { max-width: 60px; word-wrap: break-word; text-align: center; line-height: 1.2; }
+
         .input-bar {
             display: flex;
             align-items: center;
@@ -280,6 +296,7 @@
         }
         .input-bar .btn-send:hover { background: var(--accent-hover); transform: scale(1.03); }
         .input-bar .btn-send.stop { background: #e74c3c; }
+
         .footer {
             text-align: center;
             font-size: 0.65rem;
@@ -287,6 +304,7 @@
             padding-top: 10px;
             opacity: 0.6;
         }
+
         .toast {
             position: fixed;
             bottom: 100px;
@@ -305,14 +323,33 @@
             z-index: 999;
         }
         .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
         #fileInput { display: none; }
     </style>
 </head>
 <body>
 <div class="app" id="app">
+    <!-- HEADER -->
     <header class="header">
-        <a class="logo" href="#">
-            <div class="logo-icon">F</div>
+        <a class="logo" href="#" id="logoHome">
+            <div class="logo-container">
+                <!-- Manta Ray SVG Logo -->
+                <svg viewBox="0 0 100 100" width="36" height="36">
+                    <!-- Background circle already in container -->
+                    <!-- Manta body -->
+                    <path d="M20 50 Q30 35, 50 35 Q70 35, 80 50 Q75 58, 70 65 Q60 72, 50 72 Q40 72, 30 65 Q25 58, 20 50 Z" fill="white" />
+                    <!-- Cephalic fins (horns) -->
+                    <path d="M20 50 Q10 40, 15 30 Q18 38, 25 48" fill="white" />
+                    <path d="M80 50 Q90 40, 85 30 Q82 38, 75 48" fill="white" />
+                    <!-- Tail -->
+                    <path d="M50 72 L50 82" stroke="white" stroke-width="2.5" stroke-linecap="round" />
+                    <!-- Eyes -->
+                    <circle cx="40" cy="48" r="2.5" fill="#6c63ff" />
+                    <circle cx="60" cy="48" r="2.5" fill="#6c63ff" />
+                    <!-- Glow -->
+                    <circle cx="50" cy="45" r="20" fill="white" opacity="0.15" />
+                </svg>
+            </div>
             <span class="logo-text">Fikury<span>-SEEK</span></span>
         </a>
         <div class="header-actions">
@@ -321,6 +358,7 @@
         </div>
     </header>
 
+    <!-- MESSAGES -->
     <div class="messages" id="messages">
         <div class="msg assistant" id="welcome">
             <div class="bubble">👋 Hey! I'm <strong>Fikury-SEEK</strong>. Ask me anything or snap a photo.</div>
@@ -328,8 +366,10 @@
         </div>
     </div>
 
+    <!-- TOAST -->
     <div class="toast" id="toast"></div>
 
+    <!-- INPUT AREA -->
     <div class="input-area">
         <div class="drawer" id="drawer">
             <button class="attach-btn" id="cameraBtn"><i class="fas fa-camera"></i><span>Camera</span></button>
@@ -349,6 +389,7 @@
     </div>
 </div>
 
+<!-- Hidden file input for uploads -->
 <input type="file" id="fileInput" accept="image/*, .pdf, .doc, .docx, .txt" />
 
 <script>
@@ -366,6 +407,7 @@
     const newChatBtn = document.getElementById('newChatBtn');
     const voiceBtn = document.getElementById('voiceBtn');
     const fileInput = document.getElementById('fileInput');
+    const logoHome = document.getElementById('logoHome');
 
     // ===== STATE =====
     let isDrawerOpen = false;
@@ -472,7 +514,7 @@
         input.value = '';
         addMessage('user', text);
 
-        // Typing
+        // Typing indicator
         const typingWrapper = document.createElement('div');
         typingWrapper.className = 'msg assistant';
         typingWrapper.id = 'typing';
@@ -556,25 +598,18 @@
     // ===== CAMERA =====
     document.getElementById('cameraBtn').addEventListener('click', async function() {
         closeDrawer();
-        console.log('Camera button clicked');
         try {
-            // Check if getUserMedia is supported
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                throw new Error('getUserMedia not supported in this browser.');
+                throw new Error('getUserMedia not supported.');
             }
-
             showToast('📸 Opening camera...');
-            const stream = await navigator.mediaDevices.getUserMedia({ 
+            const stream = await navigator.mediaDevices.getUserMedia({
                 video: { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 480 } }
             });
-
-            // Create a video element to capture frame
             const video = document.createElement('video');
             video.srcObject = stream;
-            video.setAttribute('playsinline', ''); // needed for iOS
+            video.setAttribute('playsinline', '');
             video.play();
-
-            // Wait for video to be ready
             await new Promise((resolve) => {
                 video.onloadedmetadata = () => {
                     video.width = video.videoWidth;
@@ -582,34 +617,19 @@
                     resolve();
                 };
             });
-
-            // Draw frame onto canvas
             const canvas = document.createElement('canvas');
             canvas.width = video.videoWidth || 640;
             canvas.height = video.videoHeight || 480;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-            // Get base64 (without the data:image/jpeg;base64, prefix)
             const base64 = canvas.toDataURL('image/jpeg', 0.9).split(',')[1];
-
-            // Stop all tracks
             stream.getTracks().forEach(track => track.stop());
-
-            // Clear video element
             video.remove();
-
             if (!base64) throw new Error('Failed to capture image.');
-
             showToast('📸 Captured! Analyzing...');
-
-            // Get optional prompt from input
             const prompt = input.value.trim() || '';
             input.value = '';
-
-            // Send to vision endpoint
             await sendVision(base64, prompt);
-
         } catch (err) {
             console.error('Camera error:', err);
             showToast('⚠️ Camera error: ' + err.message);
@@ -623,7 +643,7 @@
         fileInput.click();
     });
 
-    // ===== DOCUMENT UPLOAD (placeholder) =====
+    // ===== DOCUMENT UPLOAD =====
     document.getElementById('documentBtn').addEventListener('click', () => {
         closeDrawer();
         fileInput.accept = '.pdf,.doc,.docx,.txt';
@@ -634,11 +654,7 @@
     fileInput.addEventListener('change', async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        fileInput.value = ''; // reset so same file can be re-selected
-
-        console.log('File selected:', file.name, file.type);
-
-        // If it's an image, treat as vision
+        fileInput.value = '';
         if (file.type.startsWith('image/')) {
             const reader = new FileReader();
             reader.onload = (ev) => {
@@ -647,14 +663,10 @@
                 input.value = '';
                 sendVision(base64, prompt);
             };
-            reader.onerror = (err) => {
-                console.error('FileReader error:', err);
-                showToast('⚠️ Failed to read image.');
-            };
+            reader.onerror = () => showToast('⚠️ Failed to read image.');
             reader.readAsDataURL(file);
         } else {
-            // For documents, show placeholder
-            showToast(`📄 Received: ${file.name} (document processing not implemented)`);
+            showToast(`📄 Received: ${file.name} (placeholder)`);
             addMessage('user', `📄 Uploaded: ${file.name}`);
             addMessage('assistant', 'Document processing is not yet implemented, but you can upload images for AI analysis.');
         }
@@ -666,7 +678,7 @@
         plusBtn.classList.remove('active');
     }
 
-    // ===== SEND BUTTON =====
+    // ===== SEND =====
     sendBtn.addEventListener('click', () => {
         const text = input.value.trim();
         if (text) sendMessage(text);
@@ -685,7 +697,7 @@
     voiceBtn.addEventListener('click', () => {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!SpeechRecognition) {
-            showToast('⚠️ Voice input not supported in this browser.');
+            showToast('⚠️ Voice not supported.');
             return;
         }
         if (!recognition) {
@@ -694,8 +706,7 @@
             recognition.interimResults = true;
             recognition.continuous = false;
             recognition.onresult = (e) => {
-                let final = '';
-                let interim = '';
+                let final = '', interim = '';
                 for (let i = e.resultIndex; i < e.results.length; i++) {
                     const transcript = e.results[i][0].transcript;
                     if (e.results[i].isFinal) final += transcript;
@@ -705,7 +716,6 @@
                 if (final) {
                     input.value = final;
                     recognition.stop();
-                    // Optionally auto-send after a short delay:
                     setTimeout(() => {
                         const text = input.value.trim();
                         if (text) sendMessage(text);
@@ -715,7 +725,6 @@
             recognition.onend = () => {
                 listening = false;
                 voiceBtn.classList.remove('listening');
-                showToast('🎤 Stopped listening');
             };
             recognition.onerror = (event) => {
                 console.error('Speech error:', event);
@@ -734,15 +743,19 @@
             voiceBtn.classList.add('listening');
             showToast('🎤 Listening...');
         } catch (e) {
-            console.error('Start error:', e);
+            console.error(e);
             showToast('⚠️ Could not start voice.');
         }
     });
 
-    // ===== WELCOME ACTIONS =====
-    // (optional)
-    console.log('🚀 Fikury-SEEK fully loaded.');
-    console.log('Backend URL:', BACKEND);
+    // ===== LOGO CLICK FOCUS INPUT =====
+    logoHome.addEventListener('click', (e) => {
+        e.preventDefault();
+        input.focus();
+    });
+
+    console.log('🚀 Fikury-SEEK with manta logo loaded.');
+    console.log('Backend:', BACKEND);
 </script>
 </body>
 </html>
